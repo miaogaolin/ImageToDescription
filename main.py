@@ -9,14 +9,16 @@ app = Flask(__name__)
 
 
 ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
+Image.open("./1.jpg").convert('RGB')
 
 @app.route('/')
-def example():
+def ImageToDescription():
     url = request.args.get('url')
     try:
         response = requests.get(url)
         img = Image.open(BytesIO(response.content)).convert('RGB')
-        return ci.interrogate(img)
+        ci.interrogate(img)
+        return "done"
     except Exception as e:   # 捕获所有Exception类及其子类抛出的异常/errors 
         return e
 
