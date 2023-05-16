@@ -5,7 +5,9 @@ from clip_interrogator import Config, Interrogator
 import requests
 
 ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
-Image.open("./1.jpg").convert('RGB')
+initImg = Image.open("./1.jpg").convert('RGB')
+ci.interrogate(initImg)
+
 app = Flask(__name__)
 
 @app.route('/')
