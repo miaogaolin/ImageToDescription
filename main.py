@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from PIL import Image
 from io import BytesIO
 from clip_interrogator import Config, Interrogator
