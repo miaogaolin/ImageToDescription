@@ -16,7 +16,7 @@ def ImageToDescription():
     try:
         response = requests.get(url)
         img = Image.open(BytesIO(response.content)).convert('RGB')
-        ci.interrogate(img)
+        print("res:",ci.interrogate(img))
         return "done"
     except Exception as e:   # 捕获所有Exception类及其子类抛出的异常/errors 
         return e
