@@ -4,12 +4,9 @@ from io import BytesIO
 from clip_interrogator import Config, Interrogator
 import requests
 
-app = Flask(__name__)
-
-
-
 ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
 Image.open("./1.jpg").convert('RGB')
+app = Flask(__name__)
 
 @app.route('/')
 def ImageToDescription():
