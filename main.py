@@ -11,9 +11,15 @@ app = Flask(__name__)
 @app.route('/')
 def ImageToDescription():
     url = request.args.get('url')
-  
+    mode = request.args.get('mode')
     response = requests.get(url)
     img = Image.open(BytesIO(response.content)).convert('RGB')
+    
+    if mode == 'classic':
+       return ci.interrogate_classic(img)
+    elif mode == 'negative':
+       return ci.interrogate_negative(img)
+       
     return ci.interrogate_fast(img)
    
 
