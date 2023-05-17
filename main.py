@@ -4,7 +4,7 @@ from io import BytesIO
 from clip_interrogator import Config, Interrogator
 import requests
 
-ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
+ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=10240))
 
 app = Flask(__name__)
 
@@ -19,6 +19,8 @@ def ImageToDescription():
        return ci.interrogate_classic(img)
     elif mode == 'negative':
        return ci.interrogate_negative(img)
+    elif mode == 'best':
+        return ci.interrogate(img)
        
     return ci.interrogate_fast(img)
    
