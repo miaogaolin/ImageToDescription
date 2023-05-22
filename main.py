@@ -37,7 +37,6 @@ maxImageCount = 10
 dealCount = 0
 def GetOssImages(bucket, mode, prefix=''):
   global dealCount
-  # 只处理1万张图片
   if dealCount >= maxImageCount: 
     return
   for obj in oss2.ObjectIteratorV2(bucket,prefix=prefix):
@@ -57,7 +56,7 @@ def GetOssImages(bucket, mode, prefix=''):
             img = Image.open(BytesIO(imgContent)).convert('RGB')
             
             with open(mode+'.csv', mode='a+', encoding='utf-8') as f:
-                des = '1111'
+                des = ''
                 if mode == 'classic':
                     des = ci.interrogate_classic(img)
                 elif mode == 'negative':
@@ -90,9 +89,15 @@ if __name__ == '__main__':
         auth = oss2.Auth(access_key_id, access_key_secret)
         bucket = oss2.Bucket(auth, endpoint, bucket_name)
         dealCount = 0
+        print('start fast model, time:',datetime.datetime.now())
         GetOssImages(bucket, 'fast')
+        print('end fast model, time:',datetime.datetime.now())
+        print('start classic model, time:',datetime.datetime.now())
         dealCount = 0
         GetOssImages(bucket, 'classic')
+        print('end classic model, time:',datetime.datetime.now())
+        print('start best model, time:',datetime.datetime.now())
         dealCount = 0
         GetOssImages(bucket, 'best')
+        print('end best model, time:',datetime.datetime.now())
     
