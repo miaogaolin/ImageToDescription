@@ -6,6 +6,8 @@ import requests
 import oss2
 import yaml
 import datetime
+import sys
+import os
 
 ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=10240))
 
@@ -29,23 +31,48 @@ def ImageToDescription():
     except  Exception as e:
        return str(e);
    
-
-def GetOssImages(bucket, prefix=''):
+dealCount = 0
+def GetOssImages(bucket, mode, prefix=''):
+  # 只处理1万张图片
+  if dealCount > 10000: 
+    return
+  
   for obj in oss2.ObjectIteratorV2(bucket,prefix=prefix):
         pname=obj.key.replace(prefix,'',1).lstrip('/')
         name=f"{prefix}/{pname}" if prefix else pname 
         if obj.is_prefix():
-            GetOssImages(bucket,name)
+            GetOssImages(bucket,mode, name)
         elif name.endswith(('.jpg','.jpeg','.bmp','.gif','.png', '.webp')):
+            # 只处理这样的图片 623af516ba10f659170849.jpg
+            if len(getFileBasename(name)) != 22:
+                return
+            
             imgContent = bucket.get_object(name).read()
             img = Image.open(BytesIO(imgContent)).convert('RGB')
             
-            with open('image_des.csv', mode='a+', encoding='utf-8') as f:
-                des = ci.interrogate_fast(img)
+            with open(mode+'.csv', mode='a+', encoding='utf-8') as f:
+                des = ''
+                if mode == 'classic':
+                    des = ci.interrogate_classic(img)
+                elif mode == 'negative':
+                    des = ci.interrogate_negative(img)
+                elif mode == 'best':
+                    des = ci.interrogate(img)
+                elif mode == 'fast':
+                    des = ci.interrogate_fast(img)
+
                 now = datetime.datetime.now()
                 current_time = now.strftime("%Y-%m-%d %H:%M:%S")
-                f.write(current_time + ',' +name+','+des + '\n')
-   
+
+                filename =  os.path.basename(name)
+                f.write(current_time + ',' +filename+','+des + '\n')
+                dealCount += 1
+ 
+def getFileBasename(filepath):
+    filename_with_extension = os.path.basename(filepath) # 获取带有后缀的完整文件名称: myfile.txt
+    filename_without_extension = os.path.splitext(filename_with_extension)[0] # 删除扩展名：myfile
+    return filename_without_extension
+
 if __name__ == '__main__':
     app.run(debug=True, port=8083, host='0.0.0.0')
     with open('conf.yaml', 'r') as f:
@@ -55,6 +82,8 @@ if __name__ == '__main__':
         # 对于公共访问，请设置endpoint：
         bucket_name, endpoint = data['alioss']['bucket'],data['alioss']['endpoint']    # 填写自己在控制台上创建存储空间时指定的名字和地区域名。
         auth = oss2.Auth(access_key_id, access_key_secret)
-        bucket = oss2.Bucket(auth, endpoint, bucket_name) 
-        GetOssImages(bucket)
+        bucket = oss2.Bucket(auth, endpoint, bucket_name)
+        GetOssImages(bucket, 'fast')
+        GetOssImages(bucket, 'classic')
+        GetOssImages(bucket, 'best')
     
