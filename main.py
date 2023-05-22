@@ -87,7 +87,7 @@ def ConcurrenceModel(bucket, mode, dealCount=0, prefix=''):
             # 只处理这样的图片 623af516ba10f659170849.jpg
             if len(getFileBasename(name)) != 22:
                 return
-            
+            dealCount += 1
             t = threading.Thread(target=concurrenceSub(mode, name))
             threads.append(t)
             t.start()
@@ -116,7 +116,6 @@ def concurrenceSub(mode, name):
         current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
         filename =  os.path.basename(name)
-        dealCount += 1
         f.write(current_time + ',' +filename+','+des + '\n')
                     
 
