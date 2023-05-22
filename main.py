@@ -5,6 +5,7 @@ from clip_interrogator import Config, Interrogator
 import requests
 import oss2
 import yaml
+import datetime
 
 ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=10240, caption_max_length=64))
 
@@ -41,7 +42,9 @@ def GetOssImages(bucket, prefix=''):
             
             with open('image_des.csv', mode='a+', encoding='utf-8') as f:
                 des = ci.interrogate_fast(img)
-                f.write(name+','+des + '\n')
+                now = datetime.datetime.now()
+                current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+                f.write(current_time + ',' +name+','+des + '\n')
    
 if __name__ == '__main__':
     # app.run(debug=True, port=8083, host='0.0.0.0')
