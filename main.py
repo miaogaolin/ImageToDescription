@@ -7,7 +7,7 @@ import oss2
 import yaml
 import datetime
 
-ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=10240, caption_max_length=64))
+ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=10240))
 
 app = Flask(__name__)
 
