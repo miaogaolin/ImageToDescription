@@ -36,6 +36,7 @@ def ImageToDescription():
 
 
 def GetOssImages(bucket, mode, prefix=''):
+  global dealCount
   # 只处理1万张图片
   if dealCount > 10000: 
     return
