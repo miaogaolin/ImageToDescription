@@ -6,10 +6,10 @@ import requests
 import oss2
 import yaml
 import datetime
-import sys
 import os
+import threading
 
-ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=10240))
+ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312))
 
 app = Flask(__name__)
 
@@ -53,6 +53,7 @@ def GetOssImages(bucket, mode, dealCount=0, prefix=''):
             img = Image.open(BytesIO(imgContent)).convert('RGB')
             
             with open(mode+'.csv', mode='a+', encoding='utf-8') as f:
+                des = ''
                 if mode == 'classic':
                     des = ci.interrogate_classic(img)
                 elif mode == 'negative':
@@ -69,11 +70,61 @@ def GetOssImages(bucket, mode, dealCount=0, prefix=''):
                 dealCount += 1
                 f.write(current_time + ',' +filename+','+des + '\n')
                 
+
+
+threads = []
+def ConcurrenceModel(bucket, mode, dealCount=0, prefix=''):
+    if dealCount >= maxImageCount: 
+        return
+    for obj in oss2.ObjectIteratorV2(bucket,prefix=prefix):
+        if dealCount >= maxImageCount: 
+            return
+        pname=obj.key.replace(prefix,'',1).lstrip('/')
+        name=f"{prefix}/{pname}" if prefix else pname 
+        if obj.is_prefix():
+            ConcurrenceModel(bucket,mode, dealCount, name)
+        elif name.endswith(('.jpg','.jpeg','.bmp','.gif','.png', '.webp')):
+            # 只处理这样的图片 623af516ba10f659170849.jpg
+            if len(getFileBasename(name)) != 22:
+                return
+            
+            t = threading.Thread(target=concurrenceSub(mode, name))
+            threads.append(t)
+            t.start()
+
+            if len(threads) >= 5:
+                for t in threads:
+                    t.join()
+                
+
+def concurrenceSub(mode, name):
+    imgContent = bucket.get_object(name).read()
+    img = Image.open(BytesIO(imgContent)).convert('RGB')
+    
+    with open(mode+'.csv', mode='a+', encoding='utf-8') as f:
+        des = ''
+        if mode == 'classic':
+            des = ci.interrogate_classic(img)
+        elif mode == 'negative':
+            des = ci.interrogate_negative(img)
+        elif mode == 'best':
+            des = ci.interrogate(img)
+        elif mode == 'fast':
+            des = ci.interrogate_fast(img)
+
+        now = datetime.datetime.now()
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+
+        filename =  os.path.basename(name)
+        dealCount += 1
+        f.write(current_time + ',' +filename+','+des + '\n')
+                    
+
 def getFileBasename(filepath):
     filename_with_extension = os.path.basename(filepath) # 获取带有后缀的完整文件名称: myfile.txt
     filename_without_extension = os.path.splitext(filename_with_extension)[0] # 删除扩展名：myfile
     return filename_without_extension
-
+    
 if __name__ == '__main__':
     # app.run(debug=True, port=8083, host='0.0.0.0')
     with open('conf.yaml', 'r') as f:
@@ -93,6 +144,8 @@ if __name__ == '__main__':
         print('end classic model, time:',datetime.datetime.now())
 
         print('start best model, time:',datetime.datetime.now())
-        GetOssImages(bucket, 'best')
+        ConcurrenceModel(bucket, 'best')
+        for t in threads:
+            t.join()
         print('end best model, time:',datetime.datetime.now())
     
