@@ -13,7 +13,6 @@ ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=10240))
 
 app = Flask(__name__)
 
-dealCount = 0
 
 @app.route('/')
 def ImageToDescription():
@@ -34,14 +33,17 @@ def ImageToDescription():
        return str(e);
    
 
-
+maxImageCount = 10
+dealCount = 0
 def GetOssImages(bucket, mode, prefix=''):
   global dealCount
   # 只处理1万张图片
-  if dealCount > 10000: 
+  if dealCount >= maxImageCount: 
     return
-  
   for obj in oss2.ObjectIteratorV2(bucket,prefix=prefix):
+          # 只处理1万张图片
+        if dealCount >= maxImageCount: 
+            return
         pname=obj.key.replace(prefix,'',1).lstrip('/')
         name=f"{prefix}/{pname}" if prefix else pname 
         if obj.is_prefix():
@@ -55,7 +57,7 @@ def GetOssImages(bucket, mode, prefix=''):
             img = Image.open(BytesIO(imgContent)).convert('RGB')
             
             with open(mode+'.csv', mode='a+', encoding='utf-8') as f:
-                des = ''
+                des = '1111'
                 if mode == 'classic':
                     des = ci.interrogate_classic(img)
                 elif mode == 'negative':
@@ -69,9 +71,9 @@ def GetOssImages(bucket, mode, prefix=''):
                 current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
                 filename =  os.path.basename(name)
-                f.write(current_time + ',' +filename+','+des + '\n')
                 dealCount += 1
- 
+                f.write(current_time + ',' +filename+','+des + '\n')
+                
 def getFileBasename(filepath):
     filename_with_extension = os.path.basename(filepath) # 获取带有后缀的完整文件名称: myfile.txt
     filename_without_extension = os.path.splitext(filename_with_extension)[0] # 删除扩展名：myfile
