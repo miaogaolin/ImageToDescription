@@ -47,7 +47,7 @@ def GetOssImages(bucket, prefix=''):
                 f.write(current_time + ',' +name+','+des + '\n')
    
 if __name__ == '__main__':
-    # app.run(debug=True, port=8083, host='0.0.0.0')
+    app.run(debug=True, port=8083, host='0.0.0.0')
     with open('conf.yaml', 'r') as f:
         data = yaml.safe_load(f)
         access_key_id = data['alioss']['accessKeyId']     # 替换为您的 access key id.
