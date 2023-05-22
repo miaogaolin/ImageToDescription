@@ -13,6 +13,8 @@ ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=10240))
 
 app = Flask(__name__)
 
+dealCount = 0
+
 @app.route('/')
 def ImageToDescription():
     try:
@@ -31,7 +33,8 @@ def ImageToDescription():
     except  Exception as e:
        return str(e);
    
-dealCount = 0
+
+
 def GetOssImages(bucket, mode, prefix=''):
   # 只处理1万张图片
   if dealCount > 10000: 
@@ -74,7 +77,7 @@ def getFileBasename(filepath):
     return filename_without_extension
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8083, host='0.0.0.0')
+    # app.run(debug=True, port=8083, host='0.0.0.0')
     with open('conf.yaml', 'r') as f:
         data = yaml.safe_load(f)
         access_key_id = data['alioss']['accessKeyId']     # 替换为您的 access key id.
@@ -83,7 +86,10 @@ if __name__ == '__main__':
         bucket_name, endpoint = data['alioss']['bucket'],data['alioss']['endpoint']    # 填写自己在控制台上创建存储空间时指定的名字和地区域名。
         auth = oss2.Auth(access_key_id, access_key_secret)
         bucket = oss2.Bucket(auth, endpoint, bucket_name)
+        dealCount = 0
         GetOssImages(bucket, 'fast')
+        dealCount = 0
         GetOssImages(bucket, 'classic')
+        dealCount = 0
         GetOssImages(bucket, 'best')
     
