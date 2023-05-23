@@ -10,8 +10,10 @@ import os
 import multiprocessing
 import concurrent.futures
 
-maxImageCount = 10
-ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312))
+# 处理 oss 图片的数量
+maxImageCount = 10000
+
+ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312, quiet=True))
 
 app = Flask(__name__)
 
@@ -130,13 +132,13 @@ if __name__ == '__main__':
         bucket_name, endpoint = data['alioss']['bucket'],data['alioss']['endpoint']    # 填写自己在控制台上创建存储空间时指定的名字和地区域名。
         auth = oss2.Auth(access_key_id, access_key_secret)
         bucket = oss2.Bucket(auth, endpoint, bucket_name)
-        # print('start fast model, time:',datetime.datetime.now())
-        # GetOssImages(bucket, 'fast')
-        # print('end fast model, time:',datetime.datetime.now())
+        print('start fast model, time:',datetime.datetime.now())
+        GetOssImages(bucket, 'fast')
+        print('end fast model, time:',datetime.datetime.now())
 
-        # print('start classic model, time:',datetime.datetime.now())
-        # GetOssImages(bucket, 'classic')
-        # print('end classic model, time:',datetime.datetime.now())
+        print('start classic model, time:',datetime.datetime.now())
+        GetOssImages(bucket, 'classic')
+        print('end classic model, time:',datetime.datetime.now())
 
         print('start best model, time:',datetime.datetime.now())
         # pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
