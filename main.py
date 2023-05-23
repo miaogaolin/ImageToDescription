@@ -11,7 +11,7 @@ import multiprocessing
 import concurrent.futures
 
 maxImageCount = 10
-ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312))
+ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=6144, flavor_intermediate_count=6144))
 
 app = Flask(__name__)
 
@@ -90,7 +90,7 @@ def ConcurrenceModel(bucket, mode, pool, dealCount=0, prefix=''):
             if len(basename) != 22 or basename.find("_") != -1:
                 continue
             dealCount += 1
-            pool.submit(concurrenceSub, mode, name)
+            pool.submit(concurrenceSub,mode, name)
                 
 
 def concurrenceSub(mode, name):
@@ -139,10 +139,10 @@ if __name__ == '__main__':
         # print('end classic model, time:',datetime.datetime.now())
 
         print('start best model, time:',datetime.datetime.now())
-        pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+        # pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         # pool = multiprocessing.Pool(processes = 5)
-        ConcurrenceModel(bucket, 'best', pool)
-        pool.shutdown()
-
+        # ConcurrenceModel(bucket, 'best', pool)
+        # pool.shutdown()
+        GetOssImages(bucket, 'best')
         print('end best model, time:',datetime.datetime.now())
     
