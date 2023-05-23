@@ -84,7 +84,8 @@ def ConcurrenceModel(bucket, mode, pool, dealCount=0, prefix=''):
             ConcurrenceModel(bucket,mode, pool, dealCount, name)
         elif name.endswith(('.jpg','.jpeg','.bmp','.gif','.png', '.webp')):
             # 只处理这样的图片 623af516ba10f659170849.jpg
-            if len(getFileBasename(name)) != 22:
+            basename = getFileBasename(name)
+            if len(basename) != 22 or basename.find("_") != -1:
                 return
             dealCount += 1
             
