@@ -11,7 +11,7 @@ import multiprocessing
 import concurrent.futures
 
 maxImageCount = 10
-ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=6144, flavor_intermediate_count=6144))
+ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312))
 
 app = Flask(__name__)
 
