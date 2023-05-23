@@ -38,7 +38,7 @@ def ImageToDescription():
    
 
 
-def GetOssImages(bucket, mode, dealCount=0, prefix=''):
+def GetOssImages(bucket, mode, images, dealCount=0, prefix=''):
   if dealCount >= maxImageCount: 
     return
   for obj in oss2.ObjectIteratorV2(bucket,prefix=prefix):
@@ -50,8 +50,14 @@ def GetOssImages(bucket, mode, dealCount=0, prefix=''):
             GetOssImages(bucket,mode, dealCount, name)
         elif name.endswith(('.jpg','.jpeg','.bmp','.gif','.png', '.webp')):
             # 只处理这样的图片 623af516ba10f659170849.jpg
-            if len(getFileBasename(name)) != 22:
-                return
+            basename = getFileBasename(name)
+            if len(basename) != 22 or basename.find("_") != -1:
+                continue
+            
+            filename =  os.path.basename(name)
+            if images.has_key(filename) :
+                dealCount += 1
+                continue
             
             imgContent = bucket.get_object(name).read()
             img = Image.open(BytesIO(imgContent)).convert('RGB')
@@ -70,7 +76,6 @@ def GetOssImages(bucket, mode, dealCount=0, prefix=''):
                 now = datetime.datetime.now()
                 current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                filename =  os.path.basename(name)
                 dealCount += 1
                 f.write(current_time + ',' +filename+','+des + '\n')
                 
@@ -121,7 +126,16 @@ def getFileBasename(filepath):
     filename_with_extension = os.path.basename(filepath) # 获取带有后缀的完整文件名称: myfile.txt
     filename_without_extension = os.path.splitext(filename_with_extension)[0] # 删除扩展名：myfile
     return filename_without_extension
-    
+
+def readAllImageName(path):
+    data = {}
+    with open(path, "r") as file:    # 打开并读取文件内容。
+        for line in iter(lambda: file.readline().strip(), ""):
+            lines = line.split(",")
+            data[lines[1]] = True
+
+    return data
+
 if __name__ == '__main__':
     # app.run(debug=True, port=8083, host='0.0.0.0')
     with open('conf.yaml', 'r') as f:
@@ -132,19 +146,24 @@ if __name__ == '__main__':
         bucket_name, endpoint = data['alioss']['bucket'],data['alioss']['endpoint']    # 填写自己在控制台上创建存储空间时指定的名字和地区域名。
         auth = oss2.Auth(access_key_id, access_key_secret)
         bucket = oss2.Bucket(auth, endpoint, bucket_name)
+
+        fastImage = readAllImageName("./fast.csv")
         print('start fast model, time:',datetime.datetime.now())
-        GetOssImages(bucket, 'fast')
+        GetOssImages(bucket, 'fast', fastImage)
         print('end fast model, time:',datetime.datetime.now())
 
+        classicImage = readAllImageName("./classic.csv")
         print('start classic model, time:',datetime.datetime.now())
-        GetOssImages(bucket, 'classic')
+        GetOssImages(bucket, 'classic', classicImage)
         print('end classic model, time:',datetime.datetime.now())
 
+        bestImage = readAllImageName("./best.csv")
         print('start best model, time:',datetime.datetime.now())
         # pool = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         # pool = multiprocessing.Pool(processes = 5)
         # ConcurrenceModel(bucket, 'best', pool)
         # pool.shutdown()
-        GetOssImages(bucket, 'best')
+         
+        GetOssImages(bucket, 'best', bestImage)
         print('end best model, time:',datetime.datetime.now())
     
