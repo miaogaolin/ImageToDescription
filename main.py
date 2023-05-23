@@ -7,7 +7,7 @@ import oss2
 import yaml
 import datetime
 import os
-import threading
+import multiprocessing
 
 ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312))
 
@@ -72,8 +72,7 @@ def GetOssImages(bucket, mode, dealCount=0, prefix=''):
                 
 
 
-threads = []
-def ConcurrenceModel(bucket, mode, dealCount=0, prefix=''):
+def ConcurrenceModel(bucket, mode, pool, dealCount=0, prefix=''):
     if dealCount >= maxImageCount: 
         return
     for obj in oss2.ObjectIteratorV2(bucket,prefix=prefix):
@@ -82,22 +81,18 @@ def ConcurrenceModel(bucket, mode, dealCount=0, prefix=''):
         pname=obj.key.replace(prefix,'',1).lstrip('/')
         name=f"{prefix}/{pname}" if prefix else pname 
         if obj.is_prefix():
-            ConcurrenceModel(bucket,mode, dealCount, name)
+            ConcurrenceModel(bucket,mode, pool, dealCount, name)
         elif name.endswith(('.jpg','.jpeg','.bmp','.gif','.png', '.webp')):
             # 只处理这样的图片 623af516ba10f659170849.jpg
             if len(getFileBasename(name)) != 22:
                 return
             dealCount += 1
-            t = threading.Thread(target=concurrenceSub(mode, name))
-            threads.append(t)
-            t.start()
-
-            if len(threads) >= 5:
-                for t in threads:
-                    t.join()
+            
+            pool.apply_async(concurrenceSub,(mode, name))
                 
 
 def concurrenceSub(mode, name):
+    print(mode,name)
     imgContent = bucket.get_object(name).read()
     img = Image.open(BytesIO(imgContent)).convert('RGB')
     
@@ -143,8 +138,10 @@ if __name__ == '__main__':
         print('end classic model, time:',datetime.datetime.now())
 
         print('start best model, time:',datetime.datetime.now())
-        ConcurrenceModel(bucket, 'best')
-        for t in threads:
-            t.join()
+        pool = multiprocessing.Pool(processes = 5)
+        ConcurrenceModel(bucket, 'best', pool)
+        pool.close()
+        pool.join()
+
         print('end best model, time:',datetime.datetime.now())
     
