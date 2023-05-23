@@ -9,6 +9,7 @@ import datetime
 import os
 import multiprocessing
 
+maxImageCount = 10
 ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312))
 
 app = Flask(__name__)
@@ -33,7 +34,7 @@ def ImageToDescription():
        return str(e);
    
 
-maxImageCount = 10
+
 def GetOssImages(bucket, mode, dealCount=0, prefix=''):
   if dealCount >= maxImageCount: 
     return
@@ -86,14 +87,12 @@ def ConcurrenceModel(bucket, mode, pool, dealCount=0, prefix=''):
             # 只处理这样的图片 623af516ba10f659170849.jpg
             basename = getFileBasename(name)
             if len(basename) != 22 or basename.find("_") != -1:
-                return
+                continue
             dealCount += 1
-            
             pool.apply_async(concurrenceSub,(mode, name))
                 
 
 def concurrenceSub(mode, name):
-    print(mode,name)
     imgContent = bucket.get_object(name).read()
     img = Image.open(BytesIO(imgContent)).convert('RGB')
     
