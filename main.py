@@ -120,7 +120,7 @@ def concurrenceSub(mode, name):
         current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
         filename =  os.path.basename(name)
-        f.write(current_time + ',' +filename+','+des + '\n')
+        f.write(current_time + ',' +filename+',"'+des + '"\n')
                     
 
 def getFileBasename(filepath):
