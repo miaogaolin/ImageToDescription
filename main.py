@@ -78,7 +78,7 @@ def GetOssImages(bucket, mode, images, dealCount=0, prefix=''):
                 current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
                 dealCount += 1
-                f.write(current_time + ',' +filename+','+des + '\n')
+                f.write(current_time + ',' +filename+',"'+des + '"\n')
                 
 
 
