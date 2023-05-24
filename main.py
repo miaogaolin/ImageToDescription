@@ -58,7 +58,6 @@ def GetOssImages(bucket, mode, images, dealCount=0, prefix=''):
             filename =  os.path.basename(name)
             if filename in images:
                 dealCount += 1
-                print(filename)
                 continue
             
             imgContent = bucket.get_object(name).read()
@@ -151,11 +150,13 @@ if __name__ == '__main__':
 
         fastImage = readAllImageName("./fast.csv")
         print('start fast model, time:',datetime.datetime.now())
+        print('fast model, 已处理数量:', len(fastImage))
         GetOssImages(bucket, 'fast', fastImage)
         print('end fast model, time:',datetime.datetime.now())
 
         classicImage = readAllImageName("./classic.csv")
         print('start classic model, time:',datetime.datetime.now())
+        print('classic model, 已处理数量:', len(classicImage))
         GetOssImages(bucket, 'classic', classicImage)
         print('end classic model, time:',datetime.datetime.now())
 
@@ -165,7 +166,8 @@ if __name__ == '__main__':
         # pool = multiprocessing.Pool(processes = 5)
         # ConcurrenceModel(bucket, 'best', pool)
         # pool.shutdown()
-         
+        
+        print('best model, 已处理数量:', len(bestImage))
         GetOssImages(bucket, 'best', bestImage)
         print('end best model, time:',datetime.datetime.now())
     
