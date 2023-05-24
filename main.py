@@ -12,6 +12,7 @@ import concurrent.futures
 
 # 处理 oss 图片的数量
 maxImageCount = 10000
+Image.MAX_IMAGE_PIXELS = 933120000
 
 ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312))
 
