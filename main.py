@@ -130,11 +130,13 @@ def getFileBasename(filepath):
 
 def readAllImageName(path):
     data = {}
-    with open(path, "r") as file:    # 打开并读取文件内容。
-        for line in iter(lambda: file.readline().strip(), ""):
-            lines = line.split(",")
-            data[lines[1]] = True
-
+    try:
+        with open(path, "r") as file:    # 打开并读取文件内容。
+            for line in iter(lambda: file.readline().strip(), ""):
+                lines = line.split(",")
+                data[lines[1]] = True
+    except FileNotFoundError:
+        pass
     return data
 
 if __name__ == '__main__':
