@@ -13,7 +13,7 @@ import concurrent.futures
 # 处理 oss 图片的数量
 maxImageCount = 10000
 
-ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312, quiet=True))
+ci = Interrogator(Config(clip_model_name="ViT-L-14/openai",chunk_size=13312))
 
 app = Flask(__name__)
 
@@ -55,8 +55,9 @@ def GetOssImages(bucket, mode, images, dealCount=0, prefix=''):
                 continue
             
             filename =  os.path.basename(name)
-            if images.has_key(filename) :
+            if filename in images:
                 dealCount += 1
+                print(filename)
                 continue
             
             imgContent = bucket.get_object(name).read()
