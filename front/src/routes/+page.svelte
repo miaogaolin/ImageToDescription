@@ -44,8 +44,12 @@
             <!-- Buttons -->
             <button
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                on:click={() =>
-                    (window.location.href = "/?page=" + (data.page - 1))}
+                on:click={() => {
+                    if (data.page <= 1) {
+                        return;
+                    }
+                    window.location.href = "/?page=" + (data.page - 1);
+                }}
             >
                 <svg
                     aria-hidden="true"
@@ -63,8 +67,12 @@
             </button>
             <button
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                on:click={() =>
-                    (window.location.href = "/?page=" + (data.page + 1))}
+                on:click={() => {
+                    if (data.page >= data.maxPage) {
+                        return;
+                    }
+                    window.location.href = "/?page=" + (data.page + 1);
+                }}
             >
                 Next
                 <svg
