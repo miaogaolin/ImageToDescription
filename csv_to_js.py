@@ -17,9 +17,7 @@ def readAllImageName(path):
     return data
 
 def cut_sentence(text):
-    for ch in '!"#$%&()*+,-./:;<=>?@[\\]^_‘{|}~':
-        text = text.replace(ch, " ") 
-    return text.split()
+    return text.split(",")
 
 if __name__ == '__main__':
     saveData = []
