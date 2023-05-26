@@ -176,7 +176,7 @@
                                 "/words?classic_page=" +
                                 (data.classicPage - 1) +
                                 "&fast_page=" +
-                                data.classicPage;
+                                data.fastPage;
                         }}
                     >
                         <svg
@@ -203,7 +203,7 @@
                                 "/words?classic_page=" +
                                 (data.classicPage + 1) +
                                 "&fast_page=" +
-                                data.classicPage;
+                                data.fastPage;
                         }}
                     >
                         Next
