@@ -1,4 +1,4 @@
-import { fastWords, classicWords } from '../data.js';
+import { fastWords, classicWords, bestWords } from '../data.js';
 
 export function load({ url }) {
 
@@ -16,12 +16,21 @@ export function load({ url }) {
     let classicPage = Number(url.searchParams.get('classic_page') ?? '1');
     let classicMaxPage = Math.ceil(classicWords.length / pageSize)
     if (classicPage > classicMaxPage) {
-        classicPage = fastMaxPage;
+        classicPage = classicMaxPage;
     } else if (classicPage < 1) {
         classicPage = 1;
     }
-
     let classicPageData = paginateArray(classicWords, pageSize, classicPage);
+
+    let bestPage = Number(url.searchParams.get('best_page') ?? '1');
+    let bestMaxPage = Math.ceil(bestWords.length / pageSize)
+    if (bestPage > bestMaxPage) {
+        bestPage = bestMaxPage;
+    } else if (bestPage < 1) {
+        bestPage = 1;
+    }
+    let bestPageData = paginateArray(bestWords, pageSize, bestPage);
+
     return {
         fastPage: fastPage,
         fastMaxPage: fastMaxPage,
@@ -32,6 +41,11 @@ export function load({ url }) {
         classicMaxPage: classicMaxPage,
         classicTotal: classicWords.length,
         classicWords: classicPageData,
+
+        bestPage: bestPage,
+        bestMaxPage: bestMaxPage,
+        bestTotal: bestWords.length,
+        bestWords: bestPageData,
 
         size: pageSize,
     }

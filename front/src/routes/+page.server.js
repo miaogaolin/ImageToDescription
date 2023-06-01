@@ -19,6 +19,7 @@ export function load({ url }) {
         data: pageData.map((row) => ({
             fast: row.fast,
             classic: row.classic,
+            best: row.best,
             iamge_path: '/' + row.image.substring(0, 3) + '/' + row.image.substring(3, 6) + '/' + row.image.substring(6, 9) + '/' + row.image
         }))
     };

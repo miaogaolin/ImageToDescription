@@ -4,7 +4,7 @@
 
 <div class="p-4 dark:bg-gray-900">
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {#each data.data as { fast, classic, iamge_path }}
+        {#each data.data as { fast, classic, best, iamge_path }}
             <div>
                 <img
                     class="h-auto max-w-full rounded-lg"
@@ -13,12 +13,16 @@
                 />
                 <div class="text-sm dark:text-gray-300 py-2">
                     <p>
-                        <span class="text-base font-medium">fast:</span>
+                        <span class="text-lg font-medium">Fast:</span>
                         {fast}
                     </p>
                     <p class="mt-1">
-                        <span class="text-base font-medium">classic:</span>
+                        <span class="text-lg font-medium">Classic:</span>
                         {classic}
+                    </p>
+                    <p class="mt-1">
+                        <span class="text-lg font-medium">Best:</span>
+                        {best}
                     </p>
                 </div>
             </div>
